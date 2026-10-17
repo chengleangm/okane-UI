@@ -11,17 +11,6 @@ const stories = [
 
 export default function Home() {
   return <main id="main" className="home-page">
-    <section className="home-hero shell" aria-labelledby="hero-heading">
-      <h1 id="hero-heading">Get Hyped. Get<br className="hero-title-break" /> Noticed. Get Results.</h1>
-      <p className="home-hero-sub">Tired of gambling on content that<br /> yields nothing?</p>
-      <div className="home-hero-cards">
-        <div className="home-stat home-stat-coral"><strong>10M+</strong><span>Organic views generated*</span></div>
-        <Link className="home-hero-photo home-photo-first" href="/creators/neary-na-nary" aria-label="Explore Neary Na Nary"><Image src="/images/neary.jpg" alt="Lifestyle and fashion inspiration" fill priority sizes="(max-width:600px) 26vw, 25vw" /><span className="home-photo-icon"><ArrowUpRight size={20} aria-hidden="true" /></span></Link>
-        <div className="home-stat home-stat-teal"><strong>30+</strong><span>Brands helped grow*</span></div>
-        <Link className="home-hero-photo home-photo-last" href="/creators" aria-label="Explore all creators"><Image src="/images/city.jpg" alt="City life and creative inspiration" fill priority sizes="(max-width:600px) 26vw, 25vw" /><span className="home-photo-caption">WORTH THE HYPE.<ArrowUpRight size={20} aria-hidden="true" /></span></Link>
-      </div>
-      <p className="stat-note">*Reference figures from the supplied design; pending verification. Illustrative photos.</p>
-    </section>
     <section className="shell home-directory" aria-label="Find a creator"><CreatorDirectory home /></section>
     <section className="shell story-section" aria-labelledby="story-heading">
       <div className="story-section-heading"><div><span className="market-kicker">A LITTLE INSPIRATION</span><h2 id="story-heading">More stories. More possibilities.</h2></div><Link href="/creators">Explore creators <ArrowUpRight size={18} aria-hidden="true" /></Link></div>
@@ -48,6 +37,17 @@ export default function Home() {
     <section className="shell bottom-cta" aria-labelledby="bottom-cta-heading">
       <h2 id="bottom-cta-heading">Let’s Get Hyped<br />with Okane!</h2>
       <Link className="button" href="/creators">Search for your influencer <ArrowUpRight size={16} aria-hidden="true" focusable="false" /></Link>
+    </section>
+    <section className="home-hero shell" aria-labelledby="hero-heading">
+      <h1 id="hero-heading">Get Hyped. Get<br className="hero-title-break" /> Noticed. Get Results.</h1>
+      <p className="home-hero-sub">Tired of gambling on content that<br /> yields nothing?</p>
+      <div className="home-hero-cards">
+        <div className="home-stat home-stat-coral"><strong>10M+</strong><span>Organic views generated*</span></div>
+        <Link className="home-hero-photo home-photo-first" href="/creators/neary-na-nary" aria-label="Explore Neary Na Nary"><Image src="/images/neary.jpg" alt="Lifestyle and fashion inspiration" fill sizes="(max-width:600px) 26vw, 25vw" /><span className="home-photo-icon"><ArrowUpRight size={20} aria-hidden="true" /></span></Link>
+        <div className="home-stat home-stat-teal"><strong>30+</strong><span>Brands helped grow*</span></div>
+        <Link className="home-hero-photo home-photo-last" href="/creators" aria-label="Explore all creators"><Image src="/images/city.jpg" alt="City life and creative inspiration" fill sizes="(max-width:600px) 26vw, 25vw" /><span className="home-photo-caption">WORTH THE HYPE.<ArrowUpRight size={20} aria-hidden="true" /></span></Link>
+      </div>
+      <p className="stat-note">*Reference figures from the supplied design; pending verification. Illustrative photos.</p>
     </section>
   </main>;
 }
