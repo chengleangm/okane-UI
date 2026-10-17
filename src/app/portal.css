@@ -4,3 +4,10 @@
 @media(prefers-reduced-motion:reduce){.spin{animation:none}}
 @media(min-width:601px) and (max-width:850px){.nav-links{gap:18px;font-size:11px}.nav .brand{width:160px}}
 @media(max-width:600px){.field input,.field textarea,.field select,.portal-search input,.portal-category select{font-size:16px}}
+
+/* Dedicated admin workspace; public navigation and footer are not rendered. */
+.admin-layout{min-height:100dvh;background:#f5f7f3;padding:24px 0}
+.admin-layout .portal-page{min-height:calc(100dvh - 48px);padding-top:8px;padding-bottom:40px}
+.admin-layout .portal-loading{min-height:calc(100dvh - 48px)}
+.admin-layout .login-layout{min-height:calc(100dvh - 48px);align-content:center;padding-block:40px}
+@media(max-width:600px){.admin-layout{padding:16px 0}.admin-layout .portal-page,.admin-layout .portal-loading,.admin-layout .login-layout{min-height:calc(100dvh - 32px)}.admin-layout .login-layout{padding-block:20px}}

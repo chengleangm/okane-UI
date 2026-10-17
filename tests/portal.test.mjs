@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateLogin, validateCreator, parseCreators, isSafeDemoMedia, normalizeSocialLinks, validateSocialLinks, DEMO_EMAIL, DEMO_PASSWORD } from '../src/lib/portal-demo.ts';
+import { validateLogin, validateCreator, parseCreators, isSafeDemoMedia, normalizeSocialLinks, validateSocialLinks, validateSocialFollowers, DEMO_EMAIL, DEMO_PASSWORD } from '../src/lib/portal-demo.ts';
 const creator = { id: 'demo', name: 'Demo Creator', category: 'Travel', description: 'A sample travel profile.', location: 'Demo city', image: '/images/ambrel.jpg', content: [{ id: 'one', title: 'Mountains', src: '/images/mountains.jpg', kind: 'image' }] };
 test('demo login accepts only the displayed credentials', () => {
   assert.equal(validateLogin(DEMO_EMAIL, DEMO_PASSWORD), '');
@@ -41,5 +41,21 @@ test('unsafe, malformed, and mismatched social URLs cannot be saved or loaded', 
   for (const socialLinks of [null, [], 'bad', { other: 'https://example.com' }, { website: 'javascript:alert(1)' }, { website: 'data:text/html,hello' }, { website: 'https://user:password@example.com' }, { website: 'not a link' }, { facebook: 'https://facebook.com.evil.test/demo' }, { instagram: 'https://tiktok.com/@demo' }, { tiktok: 123 }]) {
     assert.ok(validateSocialLinks(socialLinks));
     assert.throws(() => parseCreators(JSON.stringify([{ ...creator, socialLinks }])));
+  }
+});
+
+test('optional per-platform follower counts preserve zero and round trip', () => {
+  assert.equal(validateSocialFollowers(undefined), '');
+  assert.equal(validateSocialFollowers({}), '');
+  const socialFollowers = { facebook: 12500, tiktok: 0, instagram: 48600, youtube: 2100 };
+  assert.equal(validateSocialFollowers(socialFollowers), '');
+  const saved = { ...creator, socialFollowers };
+  assert.deepEqual(parseCreators(JSON.stringify([saved])), [saved]);
+});
+
+test('negative, fractional, nonnumeric, and unexpected follower counts are rejected', () => {
+  for (const socialFollowers of [null, [], { facebook: -1 }, { tiktok: 1.5 }, { instagram: '12000' }, { website: 100 }, { other: 1 }, { facebook: 1e15 }]) {
+    assert.ok(validateSocialFollowers(socialFollowers));
+    assert.throws(() => parseCreators(JSON.stringify([{ ...creator, socialFollowers }])));
   }
 });

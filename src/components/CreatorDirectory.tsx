@@ -1,10 +1,11 @@
 "use client";
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LayoutGrid, List, RotateCcw, ArrowRight } from 'lucide-react';
 import { creators } from '@/data/creators';
 import { CreatorCard } from './CreatorCard';
 import { Pagination } from './Pagination';
 import { paginateItems } from '@/lib/pagination';
+import { FAVORITES_KEY, parseFavoriteCreators, toggleFavoriteCreator } from '@/lib/favorites';
 
 export function CreatorDirectory({ home = false, initialQuery = '' }: { home?: boolean; initialQuery?: string }) {
   const [sort, setSort] = useState('featured');
@@ -12,7 +13,23 @@ export function CreatorDirectory({ home = false, initialQuery = '' }: { home?: b
   const resultsHeading = useRef<HTMLHeadingElement>(null);
   const [category, setCategory] = useState('All');
   const [query, setQuery] = useState(initialQuery);
-  const [view, setView] = useState<'grid' | 'list'>(home ? 'list' : 'grid');
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favoriteNotice, setFavoriteNotice] = useState('');
+  useEffect(() => {
+    function readFavorites() {
+      try { setFavorites(parseFavoriteCreators(localStorage.getItem(FAVORITES_KEY))); } catch { /* Favorites remain available for this visit. */ }
+    }
+    readFavorites();
+    window.addEventListener('storage', readFavorites);
+    return () => window.removeEventListener('storage', readFavorites);
+  }, []);
+  function toggleFavorite(slug: string) {
+    const next = toggleFavoriteCreator(favorites, slug);
+    setFavorites(next);
+    try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(next)); setFavoriteNotice(''); }
+    catch { setFavoriteNotice('Favorites are saved for this visit only because browser storage is unavailable.'); }
+  }
   const categories = ['All', ...new Set(creators.map(c => c.category))];
   const filtered = creators.filter(c => (category === 'All' || c.category === category) && [c.name, c.category, c.description].join(' ').toLowerCase().includes(query.trim().toLowerCase())).sort((a, b) => sort === 'name' ? a.name.localeCompare(b.name) : 0);
   const pagination = paginateItems(filtered, page);
@@ -35,7 +52,8 @@ export function CreatorDirectory({ home = false, initialQuery = '' }: { home?: b
       <section className="market-results" aria-label="Creator listings">
         <div className="market-results-bar"><div><h2 ref={resultsHeading} tabIndex={-1}>{category === 'All' ? 'All creators' : category}</h2><p role="status">{filtered.length} {filtered.length === 1 ? 'creator' : 'creators'} found</p></div><div className="market-view-tools"><label className="sort"><span>Sort</span><select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}><option value="featured">Featured</option><option value="name">Name A–Z</option></select></label><div className="view-switch" aria-label="Listing view"><button aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')}><List size={19} /></button><button aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><LayoutGrid size={18} /></button></div></div></div>
         {(query || category !== 'All') && <button className="market-reset" onClick={reset}><RotateCcw size={14} aria-hidden="true" /> Clear filters</button>}
-        <div className={'market-listings ' + view} id="discover">{pagination.items.map(c => <CreatorCard key={c.slug} creator={c} />)}</div>
+        <div className={'market-listings ' + view} id="discover">{pagination.items.map(c => <CreatorCard key={c.slug} creator={c} saved={favorites.includes(c.slug)} onToggleSaved={() => toggleFavorite(c.slug)} />)}</div>
+        {favoriteNotice && <p className="market-demo-note" role="status">{favoriteNotice}</p>}
         <Pagination {...pagination} onPageChange={changePage} />
         {!filtered.length && <div className="portal-empty"><h2>No creators found</h2><p>Try a different keyword or browse all categories.</p><button className="button" onClick={reset}>Show all creators</button></div>}
         <p className="market-demo-note">Demo listings · Photos and profile details are examples. Pricing is available on request.</p>

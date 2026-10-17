@@ -11,6 +11,15 @@ export const socialPlatforms = [
 ] as const;
 export type SocialPlatform = typeof socialPlatforms[number]['key'];
 export type SocialLinks = Partial<Record<SocialPlatform, string>>;
+export type SocialFollowers = Partial<Record<SocialPlatform, number>>;
+export function validateSocialFollowers(value: unknown): string {
+  if (value === undefined) return '';
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return 'Invalid follower counts.';
+  for (const [platform, count] of Object.entries(value)) {
+    if (!socialPlatforms.some(item => item.key === platform && item.key !== 'website') || typeof count !== 'number' || !Number.isSafeInteger(count) || count < 0 || count > 1_000_000_000_000) return 'Follower counts must be whole numbers of zero or more.';
+  }
+  return '';
+}
 const socialDomains: Record<SocialPlatform, readonly string[]> = {
   facebook: ['facebook.com', 'fb.com', 'fb.me'], tiktok: ['tiktok.com'],
   instagram: ['instagram.com'], youtube: ['youtube.com', 'youtu.be'], website: [],
@@ -52,7 +61,7 @@ export function normalizeSocialLinks(links: SocialLinks = {}): SocialLinks {
   return normalized;
 }
 export type PortfolioItem = { id: string; title: string; src: string; kind: 'image' | 'video' };
-export type PortalCreator = { id: string; name: string; category: string; description: string; image: string; location: string; content: PortfolioItem[]; socialLinks?: SocialLinks };
+export type PortalCreator = { id: string; name: string; category: string; description: string; image: string; location: string; content: PortfolioItem[]; socialLinks?: SocialLinks; socialFollowers?: SocialFollowers };
 export function validateLogin(email: string, password: string) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Enter a valid email address.';
   if (!password) return 'Enter the demo password.';
@@ -76,6 +85,7 @@ export function parseCreators(raw: string): PortalCreator[] {
     if (!c || typeof c.id !== 'string' || ids.has(c.id) || typeof c.name !== 'string' || typeof c.category !== 'string' || typeof c.description !== 'string' || typeof c.location !== 'string' || !isSafeDemoMedia(c.image, 'image') || !Array.isArray(c.content)) throw new Error('Invalid demo creator');
     ids.add(c.id);
     if (validateSocialLinks(c.socialLinks)) throw new Error('Invalid creator social links');
+    if (validateSocialFollowers(c.socialFollowers)) throw new Error('Invalid creator follower counts');
     const contentIds = new Set<string>();
     for (const item of c.content) {
       if (!item || typeof item.id !== 'string' || contentIds.has(item.id) || typeof item.title !== 'string' || !['image', 'video'].includes(item.kind) || !isSafeDemoMedia(item.src, item.kind)) throw new Error('Invalid demo content');

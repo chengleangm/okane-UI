@@ -86,7 +86,7 @@ The native dialog handles focus trapping and Escape. Upload operations are inval
 
 The public roster contains 12 illustrative creators. Browse Creators opens in a
 four-column desktop grid, with three, two, and one column layouts at narrower
-widths. The homepage retains its list view by default. Seven added names are
+widths. The homepage and Browse Creators both open in grid view; list view remains available. Seven added names are
 fictional examples; portraits do not identify verified creators.
 
 Additional illustrative photo sources (https://images.unsplash.com/):
@@ -113,3 +113,16 @@ profile in the same browser through localStorage. This is a local demo preview,
 not publication or a shared database. Newly added portal creators still do not
 create public routes. No social accounts are invented for the illustrative
 sample roster.
+
+Creator cards use a photo-first product layout with single-line ellipsis for
+names and details. The footer contains View profile and a heart button.
+Favorites are stored in this browser under okane.favorite-creators.v1.
+
+## Social audience counts
+
+Creator details display Facebook, TikTok, and Instagram follower counts below
+the circular social icons. Counts in the fixed demo roster are fictional
+examples and are labeled as demo/manual data, not live or verified metrics.
+Add/Edit Creator has optional whole-number follower inputs beside platform
+links, including YouTube. Missing counts show a dash; zero remains zero.
+Saved values follow the same browser-local preview behavior as social links.
