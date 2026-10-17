@@ -1,4 +1,53 @@
-import { ArrowUpRight, Camera, Megaphone } from 'lucide-react';
+﻿import { ArrowUpRight, Camera, Compass, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-export default function Home(){return <main id="main"><section className="hero shell"><h1>Get Hyped. Get<br/>Noticed. Get Results.</h1><p className="hero-sub">Tired of gambling on content that<br/>yields nothing?</p><div className="hero-cards"><div className="stat-card coral"><strong>10M+</strong><span>Organic views generated*</span></div><Link href="/creators/neary-na-nary" className="hero-photo first"><Image src="/images/neary.jpg" alt="Lifestyle creator in the city" fill priority sizes="30vw"/><span className="photo-caption">A little personality.<br/>A lot of impact. <ArrowUpRight className="arrow-icon" aria-hidden="true" focusable="false"/></span></Link><div className="stat-card teal"><strong>30+</strong><span>Brands helped grow*</span></div><Link href="/creators" className="hero-photo last"><Image src="/images/city.jpg" alt="Creative city life" fill priority sizes="30vw"/><span className="photo-caption">THIS WAS<br/>WORTH THE HYPE.</span></Link></div><p className="stat-note">*Figures from the supplied design; pending verification.</p></section><section className="intro shell"><h2>We create content that stands out.<br/>That sticks. That hits your audience<br/>and gets your brand moving.</h2><div className="intro-row"><div className="intro-image"><Image src="/images/fashion.jpg" alt="Expressive fashion portrait" fill sizes="(max-width:600px) 45vw, 32vw"/></div><div><p>Fast, powerful and full of energy — and always measurable, so you know exactly what works.</p><Link className="text-link" href="/creators">Find your creative match <span><ArrowUpRight className="arrow-icon" aria-hidden="true" focusable="false"/></span></Link></div></div></section><section className="expertise shell" aria-label="Our expertise"><article className="service cream"><div><span className="eyebrow"><Camera className="ui-icon" aria-hidden="true" focusable="false"/> Expertise</span><h2>Content creation</h2><p>Real stories. Fresh perspectives.<br/>Content made to connect.</p></div><div className="service-image"><Image src="/images/friends.jpg" alt="Friends sharing a sunny afternoon" fill sizes="35vw"/></div></article><article className="service aqua"><div><span className="eyebrow"><Megaphone className="ui-icon" aria-hidden="true" focusable="false"/> Expertise</span><h2>Activation</h2><p>The right content deserves to be seen. We distribute where your audience actually is, exactly when it counts.</p></div><div className="service-image"><Image src="/images/nature.jpg" alt="Sunlit green landscape" fill sizes="35vw"/></div></article></section><section className="brands shell"><h2>These brands got hyped</h2><div className="brand-row" aria-label="Brand names shown in the design"><span className="fides">fides<span>◕</span></span><span className="brand-seal">De<br/>Buiten<br/>wereld</span><span className="rhik">SRHK</span><span className="flex">seesing flex <b>◈</b></span><span className="fides">fides<span>◕</span></span></div><p className="micro muted">Reference brand names from the design; partnerships to be confirmed.</p></section><section className="cta shell"><h2>Let’s Get Hyped<br/>with Okane!</h2><Link href="/creators" className="button">Start your project <span><ArrowUpRight className="arrow-icon" aria-hidden="true" focusable="false"/></span></Link></section></main>}
+import { CreatorDirectory } from '@/components/CreatorDirectory';
+
+const stories = [
+  { title: 'Everyday stories. Real personality.', category: 'Lifestyle', image: 'fashion', slug: 'neary-na-nary', icon: Camera },
+  { title: 'A fresh perspective on your brand.', category: 'Travel', image: 'landscape', slug: 'ambrel', icon: Compass },
+  { title: 'Content that brings people together.', category: 'Entertainment', image: 'friends', slug: 'michie', icon: Users },
+];
+
+export default function Home() {
+  return <main id="main" className="home-page">
+    <section className="home-hero shell" aria-labelledby="hero-heading">
+      <h1 id="hero-heading">Get Hyped. Get<br className="hero-title-break" /> Noticed. Get Results.</h1>
+      <p className="home-hero-sub">Tired of gambling on content that<br /> yields nothing?</p>
+      <div className="home-hero-cards">
+        <div className="home-stat home-stat-coral"><strong>10M+</strong><span>Organic views generated*</span></div>
+        <Link className="home-hero-photo home-photo-first" href="/creators/neary-na-nary" aria-label="Explore Neary Na Nary"><Image src="/images/neary.jpg" alt="Lifestyle and fashion inspiration" fill priority sizes="(max-width:600px) 26vw, 25vw" /><span className="home-photo-icon"><ArrowUpRight size={20} aria-hidden="true" /></span></Link>
+        <div className="home-stat home-stat-teal"><strong>30+</strong><span>Brands helped grow*</span></div>
+        <Link className="home-hero-photo home-photo-last" href="/creators" aria-label="Explore all creators"><Image src="/images/city.jpg" alt="City life and creative inspiration" fill priority sizes="(max-width:600px) 26vw, 25vw" /><span className="home-photo-caption">WORTH THE HYPE.<ArrowUpRight size={20} aria-hidden="true" /></span></Link>
+      </div>
+      <p className="stat-note">*Reference figures from the supplied design; pending verification. Illustrative photos.</p>
+    </section>
+    <section className="shell home-directory" aria-label="Find a creator"><CreatorDirectory home /></section>
+    <section className="shell story-section" aria-labelledby="story-heading">
+      <div className="story-section-heading"><div><span className="market-kicker">A LITTLE INSPIRATION</span><h2 id="story-heading">More stories. More possibilities.</h2></div><Link href="/creators">Explore creators <ArrowUpRight size={18} aria-hidden="true" /></Link></div>
+      <div className="story-grid">{stories.map(({ title, category, image, slug, icon: Icon }) => <Link key={slug} href={'/creators/' + slug} className="story-card"><div className="story-image"><Image src={'/images/' + image + '.jpg'} alt={category + ' sample photography'} fill sizes="(max-width:600px) 90vw, 33vw" /><span><ArrowUpRight size={20} aria-hidden="true" /></span></div><div className="story-copy"><span><Icon size={15} aria-hidden="true" />{category}</span><h3>{title}</h3><p>Discover this creator and explore their sample work.</p></div></Link>)}</div>
+      <p className="market-demo-note">Sample photography for inspiration; not verified creator campaign work.</p>
+    </section>
+    <section className="shell bottom-expertise" id="expertise" aria-label="Our expertise">
+      <article className="bottom-service bottom-content">
+        <div className="bottom-service-copy"><span className="expertise-tag">Expertise</span><h2>Content creation</h2><p>Real stories. Fresh perspectives.<br />Content made to connect.</p></div>
+        <div className="bottom-service-photo"><Image src="/images/friends.jpg" alt="Friends sharing a moment together" fill sizes="(max-width:600px) 36vw, 40vw" /></div>
+      </article>
+      <article className="bottom-service bottom-activation">
+        <div className="bottom-service-copy"><span className="expertise-tag">Expertise</span><h2>Activation</h2><p>The right content deserves to be seen. We distribute where your audience actually is, exactly when it counts.</p></div>
+        <div className="bottom-service-photo"><Image src="/images/fashion.jpg" alt="Illustrative lifestyle and fashion portrait" fill sizes="(max-width:600px) 36vw, 40vw" /></div>
+      </article>
+    </section>
+    <section className="shell bottom-brands" aria-labelledby="bottom-brands-heading">
+      <h2 id="bottom-brands-heading">These brands got hyped</h2>
+      <div className="bottom-brand-row" aria-label="Brand treatments from the supplied reference">
+        {[0, 1].map(index => <div className="bottom-brand-group" key={index}><span className="reference-fides">fides<span aria-hidden="true">◕</span></span><span className="reference-seal">De<br />Buiten<br />wereld</span>{index === 0 && <><span className="reference-srhk">SRHK<span>creative connections</span></span><span className="reference-flex">seesing flex<span aria-hidden="true">✦</span></span></>}</div>)}
+      </div>
+      <p className="market-demo-note">Reference brand treatments only; partnerships pending confirmation.</p>
+    </section>
+    <section className="shell bottom-cta" aria-labelledby="bottom-cta-heading">
+      <h2 id="bottom-cta-heading">Let’s Get Hyped<br />with Okane!</h2>
+      <Link className="button" href="/creators">Search for your influencer <ArrowUpRight size={16} aria-hidden="true" focusable="false" /></Link>
+    </section>
+  </main>;
+}

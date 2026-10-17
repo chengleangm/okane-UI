@@ -81,3 +81,35 @@ Browser-based visual and interaction QA could not run because the in-app browser
 The login is `demo@okane.test` / `OkaneDemo123!`. Authentication is explicitly simulated with a sessionStorage flag. Direct portal visits without that flag redirect to login. Roster and portfolio changes are saved under a versioned localStorage key. Saved data is validated on load; storage errors preserve unsaved edits and display an actionable error. Reset restores sample creators after confirmation. No credentials are stored. Image uploads are checked for decoding and file size; video uploads are checked for readable metadata. Browser quota limits apply.
 
 The native dialog handles focus trapping and Escape. Upload operations are invalidated when panels close so a delayed file read cannot overwrite another edit. All directional arrows are Lucide SVG icons.
+
+## Expanded demo directory
+
+The public roster contains 12 illustrative creators. Browse Creators opens in a
+four-column desktop grid, with three, two, and one column layouts at narrower
+widths. The homepage retains its list view by default. Seven added names are
+fictional examples; portraits do not identify verified creators.
+
+Additional illustrative photo sources (https://images.unsplash.com/):
+
+| Local file | Source ID |
+| --- | --- |
+| sophea | photo-1438761681033-6461ffad8d80 |
+| dara | photo-1504257432389-52343af06ae3 |
+| sreypov | photo-1534528741775-53994a69daeb |
+| vannak | photo-1535713875002-d1d0cf377fde |
+| lina | photo-1517841905240-472988babdf9 |
+| piseth | photo-1507591064344-4c6ce005b128 |
+| kanika | photo-1544005313-94ddf0286df2 |
+
+## Creator social links
+
+Add/Edit Creator includes optional Facebook, TikTok, Instagram, YouTube, and
+website fields. Paste a profile URL; links without a scheme receive https://.
+Blank fields are omitted, platform domains are checked, and unsafe URL schemes
+are rejected. Existing browser records without social links still load.
+
+Saved links appear in the portal detail and on the matching public sample
+profile in the same browser through localStorage. This is a local demo preview,
+not publication or a shared database. Newly added portal creators still do not
+create public routes. No social accounts are invented for the illustrative
+sample roster.
