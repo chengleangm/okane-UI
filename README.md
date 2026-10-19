@@ -126,3 +126,17 @@ examples and are labeled as demo/manual data, not live or verified metrics.
 Add/Edit Creator has optional whole-number follower inputs beside platform
 links, including YouTube. Missing counts show a dash; zero remains zero.
 Saved values follow the same browser-local preview behavior as social links.
+
+## Group quote demo
+
+Use the Select checkbox on creator cards, or Add to group quote on a profile,
+to choose several creators. The selection bar keeps the choice across search,
+filters, pagination, and public-page navigation within the tab. Hearts remain
+separate favorites.
+
+Request quote opens /request?creators=slug,slug with a review/removal list.
+One project brief and total budget apply to everyone selected. Removing a
+creator preserves form values and updates the URL. Confirmation lists the
+submitted creators. Existing /request/[slug] links still support solo requests.
+Selection is stored in sessionStorage, while project form fields remain in
+memory. This is a simulated request; no messages or bookings are sent.

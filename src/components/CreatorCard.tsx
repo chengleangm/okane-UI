@@ -1,11 +1,15 @@
-﻿import { ArrowUpRight, Heart } from 'lucide-react';
+'use client';
+import { ArrowUpRight, Heart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useQuoteSelection } from './QuoteSelection';
 import type { Creator } from '@/types/creator';
 
 export function CreatorCard({ creator, saved, onToggleSaved }: { creator: Creator; saved: boolean; onToggleSaved: () => void }) {
   const href = '/creators/' + creator.slug;
-  return <article className="market-card product-creator-card">
+  const { selected, toggle, ready } = useQuoteSelection();
+  const checked = selected.some(item => item.slug === creator.slug);
+  return <article className="market-card product-creator-card" data-quote-selected={checked}><label className="quote-select-card"><input type="checkbox" aria-label={'Select ' + creator.name + ' for a quote'} checked={checked} disabled={!ready} onChange={() => toggle(creator.slug)} /><span>{checked ? 'Selected' : 'Select'}</span></label>
     <Link className="market-card-photo" href={href} aria-label={'View ' + creator.name + "'s profile"}>
       <Image src={creator.image} alt={creator.name + ' — illustrative demo portrait'} fill sizes="(max-width:600px) 45vw, (max-width:1100px) 30vw, 260px" />
       <span className="product-demo-tag">Demo</span>
