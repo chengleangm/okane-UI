@@ -27,7 +27,7 @@ export function PortalLogin({ error, configured, demoEnabled = false }: { error?
       {!configured && <p className="field-error" role="alert">Admin login is not configured. Add the required authentication settings to the server environment.</p>}
       {error && <p id="login-error" className="field-error" role="alert">Email or password is incorrect. Please try again.</p>}
       <form action={loginAction}>
-        <div className="field"><label htmlFor="portal-email">Email address</label><input id="portal-email" name="email" type="email" autoComplete="username" placeholder="Admin email" required aria-describedby={error ? 'login-error' : undefined} /></div>
+        <div className="field"><label htmlFor="portal-email">Email address</label><input id="portal-email" name="email" type="email" autoComplete="username" placeholder="Admin email" required aria-describedby={error ? 'login-error' : undefined} suppressHydrationWarning /></div>
         <div className="field"><label htmlFor="portal-password">Password</label><input id="portal-password" name="password" type="password" autoComplete="current-password" placeholder="Password" required aria-describedby={error ? 'login-error' : undefined} /></div>
         <button className="button login-submit" disabled={!configured}><ArrowUpRight size={16} aria-hidden="true" />Sign in</button>
       </form>
