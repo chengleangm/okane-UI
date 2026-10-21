@@ -20,7 +20,9 @@ Before starting the site, configure `.env.local`:
 - `ADMIN_EMAIL`: the administrator sign-in email.
 - `ADMIN_PASSWORD_HASH`: paste the output of `npm run admin:hash-password`. Run it in an interactive terminal; the password is hidden as you type. Use a unique password of at least 12 characters.
 
-For a first local setup in PowerShell, copy `.env.example` to `.env.local`, generate the `AUTH_SECRET` above, then open `.env.local` and fill in all four values. Run `npm run admin:hash-password` to create the password hash and paste that hash into `ADMIN_PASSWORD_HASH`. Restart the development server, then open `/admin/login` (or `/admin`, which redirects there until you sign in). The email and password are the values you configured; there are no built-in demo credentials.
+For a quick local-only demo, run `npm run dev` and open `/admin/login`. In development only, the page displays the demo email and password; those credentials are disabled in production and must never be used as a deployed account.
+
+For a real admin account, configure `.env.local`: generate `AUTH_SECRET` above, set `ADMIN_EMAIL`, and run `npm run admin:hash-password` to create `ADMIN_PASSWORD_HASH`. Restart the server, then open `/admin/login` (or `/admin`, which redirects there until you sign in). There are no built-in production credentials.
 
 Keep `.env.local` private and out of version control. Never share the password, hash, or `AUTH_SECRET`. The administrator password is verified on the server using scrypt; Auth.js issues an encrypted, HTTP-only session cookie. Only the configured administrator can sign in to `/admin`. Do not use the development demo simulator as an authenticated admin portal: `/demo/admin` is an unauthenticated, browser-local prototype, is unavailable in production, and must contain fictional data only. For a real deployment, use HTTPS and configure secrets and trusted host/proxy settings in the hosting provider.
 
