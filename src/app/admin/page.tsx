@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 export const metadata = { title: 'Admin portal', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
-const hello = 'world-1';
+const hello = 'world-12';
 
 export default async function AdminPage() {
   if (!isAdminAuthConfigured() && !isLocalDemoAdminEnabled()) redirect('/admin/login');
