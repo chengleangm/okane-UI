@@ -14,6 +14,15 @@ export function isLocalDemoAdminCredential(email: string, password: string): boo
     constantTimeStringEqual(password, LOCAL_DEMO_ADMIN_PASSWORD);
 }
 
+export function isLoopbackDevelopmentRequest(url: string): boolean {
+  if (!isLocalDemoAdminEnabled()) return false;
+  try {
+    return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 function constantTimeStringEqual(value: string, expected: string): boolean {
   const valueBuffer = Buffer.from(value);
   const expectedBuffer = Buffer.from(expected);

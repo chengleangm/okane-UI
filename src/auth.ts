@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { isAdminAuthConfigured, isLocalDemoAdminCredential, verifyAdminPassword } from '@/lib/admin-auth';
+import { isAdminAuthConfigured, isLocalDemoAdminCredential, isLoopbackDevelopmentRequest, verifyAdminPassword } from '@/lib/admin-auth';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET,
@@ -13,10 +13,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email address', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (typeof credentials.email !== 'string' || typeof credentials.password !== 'string') return null;
 
-        if (isLocalDemoAdminCredential(credentials.email, credentials.password)) {
+        if (isLoopbackDevelopmentRequest(request.url) && isLocalDemoAdminCredential(credentials.email, credentials.password)) {
           return { id: 'local-demo-admin', email: 'demo@okane.local', name: 'OKANE Demo Admin' };
         }
         if (!isAdminAuthConfigured()) return null;

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   createAdminPasswordHash,
   isLocalDemoAdminCredential,
+  isLoopbackDevelopmentRequest,
   LOCAL_DEMO_ADMIN_EMAIL,
   LOCAL_DEMO_ADMIN_PASSWORD,
   verifyAdminPassword,
@@ -27,8 +28,12 @@ test('local demo admin credentials work only in development mode', () => {
     process.env.NODE_ENV = 'development';
     assert.equal(isLocalDemoAdminCredential(LOCAL_DEMO_ADMIN_EMAIL.toUpperCase(), LOCAL_DEMO_ADMIN_PASSWORD), true);
     assert.equal(isLocalDemoAdminCredential(LOCAL_DEMO_ADMIN_EMAIL, 'wrong-password'), false);
+    assert.equal(isLoopbackDevelopmentRequest('http://localhost:3000/api/auth/callback/credentials'), true);
+    assert.equal(isLoopbackDevelopmentRequest('http://127.0.0.1:3000/api/auth/callback/credentials'), true);
+    assert.equal(isLoopbackDevelopmentRequest('https://okane.example/api/auth/callback/credentials'), false);
     process.env.NODE_ENV = 'production';
     assert.equal(isLocalDemoAdminCredential(LOCAL_DEMO_ADMIN_EMAIL, LOCAL_DEMO_ADMIN_PASSWORD), false);
+    assert.equal(isLoopbackDevelopmentRequest('http://localhost:3000/api/auth/callback/credentials'), false);
   } finally {
     if (previous === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previous;
