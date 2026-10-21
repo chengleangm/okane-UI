@@ -1,5 +1,4 @@
 export const QUOTE_DEMO_STORAGE_KEY = 'okane.quote-demo.requests.v1';
-export const quoteDemoEnabled = process.env.NODE_ENV !== 'production';
 
 export type QuoteDemoInput = {
   clientName: string;
