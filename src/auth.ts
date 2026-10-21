@@ -1,10 +1,10 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { isAdminAuthConfigured, isLocalDemoAdminCredential, isLoopbackDevelopmentRequest, verifyAdminPassword } from '@/lib/admin-auth';
+import { isAdminAuthConfigured, isDemoAdminCredential, verifyAdminPassword } from '@/lib/admin-auth';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET,
-  trustHost: process.env.AUTH_TRUST_HOST === 'true' || process.env.NODE_ENV === 'development',
+  secret: process.env.AUTH_SECRET || 'okane-public-demo-auth-secret-not-for-production',
+  trustHost: process.env.AUTH_TRUST_HOST === 'true' || process.env.NODE_ENV === 'development' || process.env.VERCEL === '1',
   pages: { signIn: '/admin/login' },
   session: { strategy: 'jwt' },
   providers: [
@@ -13,11 +13,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email address', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials, request) {
+      async authorize(credentials) {
         if (typeof credentials.email !== 'string' || typeof credentials.password !== 'string') return null;
 
-        if (isLoopbackDevelopmentRequest(request.url) && isLocalDemoAdminCredential(credentials.email, credentials.password)) {
-          return { id: 'local-demo-admin', email: 'demo@okane.local', name: 'OKANE Demo Admin' };
+        if (isDemoAdminCredential(credentials.email, credentials.password)) {
+          return { id: 'demo-admin', email: 'demo@okane.local', name: 'OKANE Demo Admin' };
         }
         if (!isAdminAuthConfigured()) return null;
 

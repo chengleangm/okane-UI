@@ -8,23 +8,14 @@ Requires Node.js 22.18+ and npm.
 
 ```sh
 npm install
-Copy-Item .env.example .env.local
-npm run admin:hash-password
 npm run dev
 ```
 
-Before starting the site, configure `.env.local`:
+Open `/admin/login` to use the public demo account. Its email and password are displayed on the login page, and they work locally and on Vercel without environment variables. Anyone can use this account; it is not secure and must never be used for real or private data. Creator edits and uploads are stored only in that browser.
 
-- `AUTH_SECRET`: generate a private secret with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"`.
-- `AUTH_TRUST_HOST=true`: needed for local development. In deployment, trust only the correctly configured host/proxy.
-- `ADMIN_EMAIL`: the administrator sign-in email.
-- `ADMIN_PASSWORD_HASH`: paste the output of `npm run admin:hash-password`. Run it in an interactive terminal; the password is hidden as you type. Use a unique password of at least 12 characters.
+For a private admin account, configure `AUTH_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD_HASH` in the server environment. Generate a private secret with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"` and run `npm run admin:hash-password` to create the password hash. The public demo login remains available, so this demo portal must not be used for real or private data.
 
-For a quick local-only demo, run `npm run dev` and open `/admin/login`. In development only, the page displays the demo email and password; those credentials are disabled in production and must never be used as a deployed account.
-
-For a real admin account, configure `.env.local`: generate `AUTH_SECRET` above, set `ADMIN_EMAIL`, and run `npm run admin:hash-password` to create `ADMIN_PASSWORD_HASH`. Restart the server, then open `/admin/login` (or `/admin`, which redirects there until you sign in). There are no built-in production credentials.
-
-Keep `.env.local` private and out of version control. Never share the password, hash, or `AUTH_SECRET`. The administrator password is verified on the server using scrypt; Auth.js issues an encrypted, HTTP-only session cookie. Only the configured administrator can sign in to `/admin`. Do not use the quote workflow demo as an authenticated admin portal: `/demo/admin` is an unauthenticated, browser-local prototype, available in production for demonstration, and must contain fictional data only. For a real deployment, use HTTPS and configure secrets and trusted host/proxy settings in the hosting provider.
+Keep `.env.local` private and out of version control. Never share a real password, hash, or `AUTH_SECRET`. The optional administrator password is verified on the server using scrypt; Auth.js issues an encrypted, HTTP-only session cookie. The public demo account remains available to anyone, so this portal is for demonstration only and must not contain real or private data. The built-in fallback session secret is public and is not suitable for real authentication. For any real deployment, replace the demo setup with a private account, configure `AUTH_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD_HASH` in the hosting provider, and use HTTPS with a trusted host/proxy configuration. Do not use the quote workflow demo as an authenticated admin portal: `/demo/admin` is a separate unauthenticated, browser-local prototype.
 
 ## Pages
 

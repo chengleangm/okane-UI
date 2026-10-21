@@ -1,26 +1,16 @@
 import { scrypt, timingSafeEqual, randomBytes } from 'node:crypto';
 
 const HASH_BYTES = 64;
-export const LOCAL_DEMO_ADMIN_EMAIL = 'demo@okane.local';
-export const LOCAL_DEMO_ADMIN_PASSWORD = 'OKANE-Demo-Only-2026';
+export const DEMO_ADMIN_EMAIL = 'demo@okane.local';
+export const DEMO_ADMIN_PASSWORD = 'OKANE-Demo-Only-2026';
 
-export function isLocalDemoAdminEnabled(): boolean {
-  return process.env.NODE_ENV === 'development';
+export function isDemoAdminEnabled(): boolean {
+  return true;
 }
 
-export function isLocalDemoAdminCredential(email: string, password: string): boolean {
-  if (!isLocalDemoAdminEnabled()) return false;
-  return constantTimeStringEqual(email.trim().toLowerCase(), LOCAL_DEMO_ADMIN_EMAIL) &&
-    constantTimeStringEqual(password, LOCAL_DEMO_ADMIN_PASSWORD);
-}
-
-export function isLoopbackDevelopmentRequest(url: string): boolean {
-  if (!isLocalDemoAdminEnabled()) return false;
-  try {
-    return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname);
-  } catch {
-    return false;
-  }
+export function isDemoAdminCredential(email: string, password: string): boolean {
+  return constantTimeStringEqual(email.trim().toLowerCase(), DEMO_ADMIN_EMAIL) &&
+    constantTimeStringEqual(password, DEMO_ADMIN_PASSWORD);
 }
 
 function constantTimeStringEqual(value: string, expected: string): boolean {
