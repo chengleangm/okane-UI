@@ -1,96 +1,24 @@
-﻿'use client';
-import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { Check, Send, ArrowLeft, RotateCcw, LoaderCircle } from 'lucide-react';
+import { ArrowUpRight, FileText } from 'lucide-react';
 import type { Creator } from '@/types/creator';
-import { validateRequest, type RequestValues } from '@/lib/validations';
-
-const empty: RequestValues = { company: '', description: '', requirements: '', date: '', budget: '', notes: '' };
-function localDate() {
-  const date = new Date();
-  return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-}
+import { quoteDemoEnabled } from '@/lib/quote-demo';
+import { QuoteDemoFlow } from './QuoteDemoFlow';
 
 export function RequestFlow({ creator, selectedCreators }: { creator?: Creator; selectedCreators?: Creator[] }) {
-  const participants = selectedCreators ?? (creator ? [creator] : []);
-  const names = participants.map(person => person.name).join(', ');
-  const [stage, setStage] = useState<'connect' | 'form' | 'success'>('connect');
-  const [submittedCreators, setSubmittedCreators] = useState<Creator[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [values, setValues] = useState<RequestValues>(empty);
-  const [errors, setErrors] = useState<Partial<Record<keyof RequestValues, string>>>({});
-  const [failure, setFailure] = useState('');
-  const [simulateFailure, setSimulateFailure] = useState(false);
-  const heading = useRef<HTMLHeadingElement>(null);
-  const form = useRef<HTMLFormElement>(null);
-  const lock = useRef(false);
+  const creators = selectedCreators ?? (creator ? [creator] : []);
+  const creatorNames = creators.map(person => person.name).join(', ');
 
-  function focusHeading() { requestAnimationFrame(() => heading.current?.focus()); }
-  async function connect() {
-    if (lock.current) return;
-    lock.current = true; setBusy(true); setFailure('');
-    await new Promise(resolve => setTimeout(resolve, 650));
-    if (simulateFailure) setFailure('Demo connection failed. Turn off the error preview and try again.');
-    else { setStage('form'); focusHeading(); }
-    setBusy(false); lock.current = false;
-  }
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (lock.current) return;
-    if (!participants.length) { setFailure('Select at least one creator before requesting a quote.'); return; }
-    const next = validateRequest(values, localDate());
-    setErrors(next);
-    if (Object.keys(next).length) {
-      form.current?.querySelector<HTMLElement>('[name="' + Object.keys(next)[0] + '"]')?.focus();
-      return;
-    }
-    lock.current = true; setBusy(true);
-    setSubmittedCreators([...participants]);
-    await new Promise(resolve => setTimeout(resolve, 700));
-    setStage('success'); setBusy(false); lock.current = false; focusHeading();
-  }
-  function field(name: keyof RequestValues, label: string, kind = 'text', placeholder = '') {
-    const common = {
-      id: name, name, value: values[name],
-      onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setValues(current => ({ ...current, [name]: event.target.value })),
-      'aria-invalid': !!errors[name], 'aria-describedby': errors[name] ? name + '-error' : undefined,
-      required: name !== 'notes', maxLength: name === 'company' ? 120 : 3000, disabled: busy,
-    };
-    return <div className="field"><label htmlFor={name}>{label}{name !== 'notes' && <span aria-hidden="true"> *</span>}</label>
-      {kind === 'textarea' ? <textarea {...common} rows={name === 'description' ? 4 : 2} placeholder={placeholder} /> : <input {...common} type={kind} min={kind === 'date' ? localDate() : kind === 'number' ? '1' : undefined} step={kind === 'number' ? 'any' : undefined} placeholder={placeholder} />}
-      {errors[name] && <p id={name + '-error'} className="field-error">{errors[name]}</p>}
-    </div>;
-  }
+  if (quoteDemoEnabled) return <QuoteDemoFlow creators={creators} />;
 
-  return <section className="request-panel"><span className="demo-label">FRONTEND DEMO</span>
-    {stage === 'connect' ? <>
-      <h2 ref={heading} tabIndex={-1}>{participants.length > 1 ? 'One quote. Your selected creators.' : 'Request a quote'}</h2>
-      <p>Share one project brief for <strong>{names}</strong>. Your budget will cover the whole request.</p>
-      <div className="demo-notice"><strong>Try the connection flow</strong><p>This preview simulates a Telegram connection. It does not authenticate your account or send messages.</p></div>
-      <button className="button telegram" onClick={connect} disabled={busy}>{busy ? <LoaderCircle className="ui-icon icon-spin" aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}{busy ? 'Simulating connection…' : 'Simulate Telegram connection'}</button>
-      <details className="demo-controls"><summary>Demo testing options</summary><label><input type="checkbox" checked={simulateFailure} onChange={event => setSimulateFailure(event.target.checked)} />Preview a connection error</label></details>
-      {failure && <p role="alert" className="field-error">{failure}</p>}
-    </> : stage === 'form' ? <>
-      <div className="connected"><Check size={14} aria-hidden="true" />Telegram connection simulated<button onClick={() => { setStage('connect'); focusHeading(); }}><RotateCcw className="ui-icon" aria-hidden="true" />Reset</button></div>
-      <h2 ref={heading} tabIndex={-1}>Tell us about your project</h2><p>One brief for all selected creators. You can remove creators from the selection without losing your project details.</p>
-      <form ref={form} onSubmit={submit} noValidate>
-        <div className="field"><label htmlFor="selected-creators">Selected creators ({participants.length})</label><textarea id="selected-creators" value={names} readOnly rows={Math.min(4, Math.max(2, participants.length))} /></div>
-        {field('company', 'Client / company name', 'text', 'Your name or company')}
-        {field('description', 'Project description', 'textarea', 'Tell us what you have in mind…')}
-        {field('requirements', 'Collaboration requirements', 'textarea', 'Content format, deliverables, and campaign goals')}
-        <div className="form-row">{field('date', 'Preferred date', 'date')}{field('budget', 'Total project budget (USD)', 'number', '500')}</div>
-        <p className="micro muted">This is the total budget for all {participants.length} selected {participants.length === 1 ? 'creator' : 'creators'}, not a per-creator amount.</p>
-        {field('notes', 'Additional notes', 'textarea', 'Anything else we should know?')}
-        <p className="micro muted">Required fields are marked *. Demo only — information stays on this page and is cleared on refresh.</p>
-        {failure && <p role="alert" className="field-error">{failure}</p>}
-        <button className="button" type="submit" disabled={busy}>{busy ? 'Preparing demo request…' : 'Submit demo request'}{busy ? <LoaderCircle className="ui-icon icon-spin" aria-hidden="true" /> : <Send className="ui-icon" aria-hidden="true" />}</button>
-      </form>
-    </> : <div className="confirmation">
-      <span className="success-icon"><Check size={30} aria-hidden="true" /></span><h2 ref={heading} tabIndex={-1}>Your quote brief is ready.</h2>
-      <p>Demo request completed for {submittedCreators.length} {submittedCreators.length === 1 ? 'creator' : 'creators'}.</p>
-      <div className="demo-notice"><strong>No request was sent.</strong><p>This is a frontend preview. There is no verified Telegram connection or saved booking.</p></div>
-      <dl><dt>Selected creators</dt><dd>{submittedCreators.map(person => person.name).join(', ')}</dd><dt>Client / company</dt><dd>{values.company}</dd><dt>Preferred date</dt><dd>{values.date}</dd><dt>Total project budget</dt><dd>${Number(values.budget).toLocaleString()} USD</dd></dl>
-      <Link className="button" href="/creators"><ArrowLeft size={15} aria-hidden="true" />Back to creators</Link>
-    </div>}
+  return <section className="request-panel request-status" aria-labelledby="request-status-title">
+    <div className="request-status-icon"><FileText size={21} aria-hidden="true" /></div>
+    <p className="request-status-label">Quote request status</p>
+    <h2 id="request-status-title">Online quote requests aren’t available yet</h2>
+    <p className="request-status-message">
+      {creatorNames ? `Your selection: ${creatorNames}. ` : ''}
+      This site can’t submit or save a quote request right now.
+    </p>
+    <p className="request-status-note">No project details are being collected or sent from this page.</p>
+    <Link className="button request-status-action" href="/creators">Continue browsing creators <ArrowUpRight size={16} aria-hidden="true" /></Link>
   </section>;
 }

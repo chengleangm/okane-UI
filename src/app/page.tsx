@@ -15,7 +15,7 @@ export default function Home() {
     <section className="shell story-section" aria-labelledby="story-heading">
       <div className="story-section-heading"><div><span className="market-kicker">A LITTLE INSPIRATION</span><h2 id="story-heading">More stories. More possibilities.</h2></div><Link href="/creators">Explore creators <ArrowUpRight size={18} aria-hidden="true" /></Link></div>
       <div className="story-grid">{stories.map(({ title, category, image, slug, icon: Icon }) => <Link key={slug} href={'/creators/' + slug} className="story-card"><div className="story-image"><Image src={'/images/' + image + '.jpg'} alt={category + ' sample photography'} fill sizes="(max-width:600px) 90vw, 33vw" /><span><ArrowUpRight size={20} aria-hidden="true" /></span></div><div className="story-copy"><span><Icon size={15} aria-hidden="true" />{category}</span><h3>{title}</h3><p>Discover this creator and explore their sample work.</p></div></Link>)}</div>
-      <p className="market-demo-note">Sample photography for inspiration; not verified creator campaign work.</p>
+      <p className="market-demo-note">Illustrative photography; not verified campaign work.</p>
     </section>
     <section className="shell bottom-expertise" id="expertise" aria-label="Our expertise">
       <article className="bottom-service bottom-content">

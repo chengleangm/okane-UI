@@ -1,12 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateLogin, validateCreator, parseCreators, isSafeDemoMedia, normalizeSocialLinks, validateSocialLinks, validateSocialFollowers, DEMO_EMAIL, DEMO_PASSWORD } from '../src/lib/portal-demo.ts';
+import { validateCreator, parseCreators, isSafePortalMedia, normalizeSocialLinks, validateSocialLinks, validateSocialFollowers } from '../src/lib/portal-data.ts';
 const creator = { id: 'demo', name: 'Demo Creator', category: 'Travel', description: 'A sample travel profile.', location: 'Demo city', image: '/images/ambrel.jpg', content: [{ id: 'one', title: 'Mountains', src: '/images/mountains.jpg', kind: 'image' }] };
-test('demo login accepts only the displayed credentials', () => {
-  assert.equal(validateLogin(DEMO_EMAIL, DEMO_PASSWORD), '');
-  assert.equal(validateLogin(' DEMO@OKANE.TEST ', DEMO_PASSWORD), '');
-  for (const [email, password] of [['', ''], ['wrong', 'pass'], [DEMO_EMAIL, ''], [DEMO_EMAIL, 'incorrect'], ['someone@example.com', DEMO_PASSWORD]]) assert.ok(validateLogin(email, password));
-});
 test('creator form requires meaningful profile details', () => {
   assert.equal(validateCreator('Demo Creator', 'Travel', 'A sample travel profile.'), '');
   assert.ok(validateCreator(' ', 'Travel', 'A sample travel profile.'));
@@ -20,11 +15,11 @@ test('saved creator data round trips and supports an empty roster', () => {
 test('corrupt storage, duplicate IDs and unexpected media are rejected', () => {
   for (const value of ['oops', '{}', JSON.stringify([creator, creator]), JSON.stringify([{ ...creator, image: 'javascript:alert(1)' }]), JSON.stringify([{ ...creator, content: [{ ...creator.content[0], kind: 'script' }] }]), JSON.stringify([{ ...creator, content: [creator.content[0], creator.content[0]] }])]) assert.throws(() => parseCreators(value));
 });
-test('demo media accepts only local sample assets or typed media data', () => {
-  assert.equal(isSafeDemoMedia('/images/ambrel.jpg', 'image'), true);
-  assert.equal(isSafeDemoMedia('data:image/png;base64,YQ==', 'image'), true);
-  assert.equal(isSafeDemoMedia('data:video/mp4;base64,YQ==', 'video'), true);
-  for (const src of ['https://example.com/image.jpg', 'data:image/svg+xml;base64,YQ==', '/images/../../secret.jpg', 'data:video/mp4;base64,YQ==']) assert.equal(isSafeDemoMedia(src, 'image'), false);
+test('portal media accepts only local image assets or typed media data', () => {
+  assert.equal(isSafePortalMedia('/images/ambrel.jpg', 'image'), true);
+  assert.equal(isSafePortalMedia('data:image/png;base64,YQ==', 'image'), true);
+  assert.equal(isSafePortalMedia('data:video/mp4;base64,YQ==', 'video'), true);
+  for (const src of ['https://example.com/image.jpg', 'data:image/svg+xml;base64,YQ==', '/images/../../secret.jpg', 'data:video/mp4;base64,YQ==']) assert.equal(isSafePortalMedia(src, 'image'), false);
 });
 
 test('optional social links accept pasted URLs, normalize missing schemes, and round trip', () => {

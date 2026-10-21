@@ -1,6 +1,3 @@
-export const DEMO_EMAIL = 'demo@okane.test';
-export const DEMO_PASSWORD = 'OkaneDemo123!';
-export const SESSION_KEY = 'okane.portal.session.v1';
 export const STORAGE_KEY = 'okane.portal.creators.v1';
 export const socialPlatforms = [
   { key: 'facebook', label: 'Facebook', placeholder: 'https://www.facebook.com/username' },
@@ -25,6 +22,7 @@ const socialDomains: Record<SocialPlatform, readonly string[]> = {
   instagram: ['instagram.com'], youtube: ['youtube.com', 'youtu.be'], website: [],
 };
 export function normalizeSocialUrl(raw: string): string {
+  if (typeof raw !== 'string') return '';
   const value = raw.trim();
   if (!value) return '';
   const url = new URL(/^[a-z][a-z\d+.-]*:/i.test(value) ? value : 'https://' + value);
@@ -62,33 +60,36 @@ export function normalizeSocialLinks(links: SocialLinks = {}): SocialLinks {
 }
 export type PortfolioItem = { id: string; title: string; src: string; kind: 'image' | 'video' };
 export type PortalCreator = { id: string; name: string; category: string; description: string; image: string; location: string; content: PortfolioItem[]; socialLinks?: SocialLinks; socialFollowers?: SocialFollowers };
-export function validateLogin(email: string, password: string) {
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Enter a valid email address.';
-  if (!password) return 'Enter the demo password.';
-  if (email.trim().toLowerCase() !== DEMO_EMAIL || password !== DEMO_PASSWORD) return 'Use the demo email and password shown below.';
+export function validateCreator(name: unknown, category: unknown, description: unknown) {
+  const normalizedName = typeof name === 'string' ? name : '';
+  const normalizedCategory = typeof category === 'string' ? category : '';
+  const normalizedDescription = typeof description === 'string' ? description : '';
+  if (normalizedName.trim().length < 2) return 'Enter a creator name with at least 2 characters.';
+  if (!normalizedCategory.trim()) return 'Choose a content category.';
+  if (normalizedDescription.trim().length < 10) return 'Add a description of at least 10 characters.';
   return '';
 }
-export function validateCreator(name: string, category: string, description: string) {
-  if (name.trim().length < 2) return 'Enter a creator name with at least 2 characters.';
-  if (!category.trim()) return 'Choose a content category.';
-  if (description.trim().length < 10) return 'Add a description of at least 10 characters.';
-  return '';
-}
-export function isSafeDemoMedia(src: unknown, kind: 'image' | 'video'): src is string {
+export function isSafePortalMedia(src: unknown, kind: 'image' | 'video'): src is string {
   return typeof src === 'string' && ((kind === 'image' && /^\/images\/[a-z0-9-]+\.(jpg|png)$/.test(src)) || new RegExp(`^data:${kind === 'image' ? 'image/(png|jpeg|webp)' : 'video/(mp4|webm)'};base64,[A-Za-z0-9+/=]+$`).test(src));
 }
-export function parseCreators(raw: string): PortalCreator[] {
-  const data: unknown = JSON.parse(raw);
-  if (!Array.isArray(data) || data.length > 50) throw new Error('Invalid demo data');
+export function parseCreators(raw: string | null | undefined): PortalCreator[] {
+  if (typeof raw !== 'string' || !raw) throw new Error('Invalid creator data');
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error('Invalid creator data');
+  }
+  if (!Array.isArray(data) || data.length > 50) throw new Error('Invalid creator data');
   const ids = new Set<string>();
   for (const c of data) {
-    if (!c || typeof c.id !== 'string' || ids.has(c.id) || typeof c.name !== 'string' || typeof c.category !== 'string' || typeof c.description !== 'string' || typeof c.location !== 'string' || !isSafeDemoMedia(c.image, 'image') || !Array.isArray(c.content)) throw new Error('Invalid demo creator');
+    if (!c || typeof c.id !== 'string' || ids.has(c.id) || typeof c.name !== 'string' || typeof c.category !== 'string' || typeof c.description !== 'string' || typeof c.location !== 'string' || !isSafePortalMedia(c.image, 'image') || !Array.isArray(c.content)) throw new Error('Invalid creator record');
     ids.add(c.id);
     if (validateSocialLinks(c.socialLinks)) throw new Error('Invalid creator social links');
     if (validateSocialFollowers(c.socialFollowers)) throw new Error('Invalid creator follower counts');
     const contentIds = new Set<string>();
     for (const item of c.content) {
-      if (!item || typeof item.id !== 'string' || contentIds.has(item.id) || typeof item.title !== 'string' || !['image', 'video'].includes(item.kind) || !isSafeDemoMedia(item.src, item.kind)) throw new Error('Invalid demo content');
+      if (!item || typeof item.id !== 'string' || contentIds.has(item.id) || typeof item.title !== 'string' || !['image', 'video'].includes(item.kind) || !isSafePortalMedia(item.src, item.kind)) throw new Error('Invalid portfolio content');
       contentIds.add(item.id);
     }
   }

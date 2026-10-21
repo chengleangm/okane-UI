@@ -1,142 +1,56 @@
 # OKANE Digital
 
-Phase 1 frontend demo built with Next.js App Router, React, TypeScript, and Tailwind CSS. Production services are intentionally not implemented.
+OKANE Digital is a creator directory and administrator portal built with Next.js App Router, React, and TypeScript.
 
 ## Run locally
 
-Requires Node.js 22.18+ (for the TypeScript validation test runner) and npm. The app itself supports Next.js's Node.js minimum. The nanoid transitive dependency is pinned to 3.3.16 because the registry returned an unavailable 3.3.20 during installation.
+Requires Node.js 22.18+ and npm.
 
 ```sh
 npm install
+Copy-Item .env.example .env.local
+npm run admin:hash-password
 npm run dev
 ```
 
-Open http://localhost:3000. For a production build:
+Before starting the site, configure `.env.local`:
+
+- `AUTH_SECRET`: generate a private secret with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"`.
+- `AUTH_TRUST_HOST=true`: needed for local development. In deployment, trust only the correctly configured host/proxy.
+- `ADMIN_EMAIL`: the administrator sign-in email.
+- `ADMIN_PASSWORD_HASH`: paste the output of `npm run admin:hash-password`. Run it in an interactive terminal; the password is hidden as you type. Use a unique password of at least 12 characters.
+
+For a first local setup in PowerShell, copy `.env.example` to `.env.local`, generate the `AUTH_SECRET` above, then open `.env.local` and fill in all four values. Run `npm run admin:hash-password` to create the password hash and paste that hash into `ADMIN_PASSWORD_HASH`. Restart the development server, then open `/admin/login` (or `/admin`, which redirects there until you sign in). The email and password are the values you configured; there are no built-in demo credentials.
+
+Keep `.env.local` private and out of version control. Never share the password, hash, or `AUTH_SECRET`. The administrator password is verified on the server using scrypt; Auth.js issues an encrypted, HTTP-only session cookie. Only the configured administrator can sign in to `/admin`. Do not use the development demo simulator as an authenticated admin portal: `/demo/admin` is an unauthenticated, browser-local prototype, is unavailable in production, and must contain fictional data only. For a real deployment, use HTTPS and configure secrets and trusted host/proxy settings in the hosting provider.
+
+## Pages
+
+- `/`: OKANE homepage and creator listings.
+- `/creators`: searchable creator directory.
+- `/creators/[slug]`: creator profile and portfolio.
+- `/request/[slug]` and `/request`: in development, these routes run a browser-local quote workflow demo; production builds retain the notice that online quote submissions are unavailable.
+- `/demo`: development-only demo control panel.
+- `/demo/telegram`: development-only simulated Telegram conversation. It requires the private session link created by a quote request; the link is a bearer token and should not be shared.
+- `/demo/admin`: development-only, unauthenticated simulated admin Telegram bot and ratings viewer; not the administrator portal.
+- `/admin/login`: administrator sign-in.
+- `/admin`: authenticated creator management workspace.
+- `/portal` and `/portal/login`: compatibility redirects to the matching `/admin` pages.
+
+Creator information and photography currently included in the site are illustrative and should be replaced with approved real content before launch. Ratings are not shown unless actual rating data is supplied.
+
+The administrator portal uses server-side Auth.js authentication. Creator edits and uploaded portfolio content are currently stored in the browser only; they are not shared between administrators and do not update public profiles. A shared database and media storage are not configured.
+
+### Quote workflow prototype
+
+Run `npm run dev` and open `/demo` to try the development-only quote workflow. It simulates a Telegram connection, client request, admin reply, and request-linked rating using fictional data in browser `localStorage`. There is no client account, client dashboard, or client inbox. The client follows a private session link containing an unguessable token in the URL fragment; the token is checked against local browser data and is not sent in the HTTP request. Treat the link as a bearer link and do not share it.
+
+No real Telegram API, quote API, email, or server-side storage is connected. Demo data is not secure and cannot synchronize across different browsers or devices; separate browser profiles will not share requests or responses. Do not enter real customer information. Malformed stored records are ignored and reported in the simulator. The `/demo` routes are unavailable in production builds, which continue to show the non-submission notice.
+
+## Validation
 
 ```sh
 npm run typecheck
 npm test
 npm run build
-npm start
 ```
-
-## Pages and components
-
-- `/`: screenshot-inspired landing page, statistic cards, content/activation sections, brand names, and project CTA.
-- `/creators`: creator cards and working alphabetical/featured sorting.
-- `/creators/[slug]`: individual creator information and illustrative portfolio.
-- `/request/[slug]`: simulated Telegram connection, validated request form, and demo confirmation.
-- `/portal/login`: simulated admin login with visible demo credentials, validation, show/hide password, and loading state.
-- `/portal`: browser-local creator management, search/filter, add/edit/remove creator, image/video upload, edit/remove portfolio content, reset, and logout.
-- Shared navigation, mobile menu, footer, creator cards/profile, directory, and request flow components.
-- CSS custom properties define color, radius, and typography tokens. Responsive grids and reduced-motion support are included.
-
-## Try the demo
-
-1. Open Our Creators and choose a profile.
-2. Select Request work.
-3. Optionally expand Demo testing options and enable the connection-error preview. Disable it to continue.
-4. Select Simulate Telegram connection.
-5. Submit an empty form to see field-level validation; then fill the required fields and submit.
-6. Review the demo confirmation. No request is sent or saved.
-
-The selected creator is represented by the route and preserved through the flow. Form values stay only in memory; navigating away or refreshing clears them. No Telegram account is authenticated and no messages are sent. There is no production submission endpoint.
-
-## Design and asset limitations
-
-The Figma integration denied access to file `1TyeOXEshi0wWaimmnIuhr`, node `42:76`. Implementation therefore uses the user-supplied screenshots as reference, rather than extracted Figma measurements. The green typography, white space, burgundy buttons, colorful cards, section order, and profile/request proportions follow those screenshots. Typography uses locally hosted Google Sans (regular 400, medium 500, and bold 700), with natural letter spacing. Its SIL Open Font License is included in `public/fonts/OFL.txt`.
-
-Original photos, partner brand logos, and videos were not accessible. The user-supplied OKANE logo is now used unchanged in the header, with the matching supplied icon as the favicon. Local illustrative Unsplash photos are temporary assets; reference partner brand names are temporary treatments. Exact asset fidelity is not claimed. Creator names follow the supplied screenshots, but photos, categories, descriptions, and portfolio imagery are explicitly demo content. No follower counts or prices are represented as verified. Landing statistics and partner names from the screenshots are labeled pending verification. Replace these with approved content before launch.
-
-Photo source IDs (https://images.unsplash.com/):
-
-| Local file | Source ID |
-| --- | --- |
-| neary / fashion | photo-1483985988355-763728e1935b |
-| ambrel | photo-1500648767791-00dcc994a43e |
-| kalucas | photo-1506794778202-cad84cf45f1d |
-| michie | photo-1519085360753-af0119f7cbe7 |
-| gabriel | photo-1524504388940-b1c1722653e1 |
-| city | photo-1519608487953-e999c86e7455 |
-| friends | photo-1529156069898-49953e39b3ac |
-| nature | photo-1441974231531-c6227db76b6e |
-| mountains | photo-1464822759023-fed622ff2c3b |
-| sunset | photo-1472120435266-53107fd0c44a |
-| landscape | photo-1470770841072-f978cf4d019e |
-
-## Phase 2 — only after approval
-
-Replace the typed sample creator data with database reads. Add PostgreSQL/Prisma and server-validated Route Handlers, expiring Telegram linking tokens, genuine bot verification, request persistence, administrator notifications, result delivery, and Telegram ratings. Add authentication for administrator bot commands, rate limits, webhook verification, and duplicate-submission protection. Keep tokens server-side. Browser-supplied Telegram chat IDs must never be trusted.
-
-The user approved expanding Phase 1 to include a frontend-only administrator portal and a login screen. The portal is a simulated browser-local workspace, not production authentication or a secure admin dashboard. Public profiles remain the fixed sample data; portal edits are not published. See `DEMO.md` for the full client presentation walkthrough. No contact address or creator-application destination was invented.
-
-## Verification
-
-Verified locally: `npm run typecheck`, all ten validation tests, and `npm run build` pass. The production server returned HTTP 200 for the landing page, directory, Ambrel profile, and Ambrel request page; an unknown profile returned HTTP 404. Next.js image optimization returned a valid JPEG with HTTP 200.
-
-Browser-based visual and interaction QA could not run because the in-app browser was unavailable. Responsive CSS is implemented but viewport screenshots, console inspection, mobile menu clicks, and the complete browser submission flow still require verification. Manually check 375, 390, 768, 1024, 1280, 1440, and 1920 pixel widths before approving design fidelity.
-
-## Portal demo implementation
-
-The login is `demo@okane.test` / `OkaneDemo123!`. Authentication is explicitly simulated with a sessionStorage flag. Direct portal visits without that flag redirect to login. Roster and portfolio changes are saved under a versioned localStorage key. Saved data is validated on load; storage errors preserve unsaved edits and display an actionable error. Reset restores sample creators after confirmation. No credentials are stored. Image uploads are checked for decoding and file size; video uploads are checked for readable metadata. Browser quota limits apply.
-
-The native dialog handles focus trapping and Escape. Upload operations are invalidated when panels close so a delayed file read cannot overwrite another edit. All directional arrows are Lucide SVG icons.
-
-## Expanded demo directory
-
-The public roster contains 12 illustrative creators. Browse Creators opens in a
-four-column desktop grid, with three, two, and one column layouts at narrower
-widths. The homepage and Browse Creators both open in grid view; list view remains available. Seven added names are
-fictional examples; portraits do not identify verified creators.
-
-Additional illustrative photo sources (https://images.unsplash.com/):
-
-| Local file | Source ID |
-| --- | --- |
-| sophea | photo-1438761681033-6461ffad8d80 |
-| dara | photo-1504257432389-52343af06ae3 |
-| sreypov | photo-1534528741775-53994a69daeb |
-| vannak | photo-1535713875002-d1d0cf377fde |
-| lina | photo-1517841905240-472988babdf9 |
-| piseth | photo-1507591064344-4c6ce005b128 |
-| kanika | photo-1544005313-94ddf0286df2 |
-
-## Creator social links
-
-Add/Edit Creator includes optional Facebook, TikTok, Instagram, YouTube, and
-website fields. Paste a profile URL; links without a scheme receive https://.
-Blank fields are omitted, platform domains are checked, and unsafe URL schemes
-are rejected. Existing browser records without social links still load.
-
-Saved links appear in the portal detail and on the matching public sample
-profile in the same browser through localStorage. This is a local demo preview,
-not publication or a shared database. Newly added portal creators still do not
-create public routes. No social accounts are invented for the illustrative
-sample roster.
-
-Creator cards use a photo-first product layout with single-line ellipsis for
-names and details. The footer contains View profile and a heart button.
-Favorites are stored in this browser under okane.favorite-creators.v1.
-
-## Social audience counts
-
-Creator details display Facebook, TikTok, and Instagram follower counts below
-the circular social icons. Counts in the fixed demo roster are fictional
-examples and are labeled as demo/manual data, not live or verified metrics.
-Add/Edit Creator has optional whole-number follower inputs beside platform
-links, including YouTube. Missing counts show a dash; zero remains zero.
-Saved values follow the same browser-local preview behavior as social links.
-
-## Group quote demo
-
-Use the Select checkbox on creator cards, or Add to group quote on a profile,
-to choose several creators. The selection bar keeps the choice across search,
-filters, pagination, and public-page navigation within the tab. Hearts remain
-separate favorites.
-
-Request quote opens /request?creators=slug,slug with a review/removal list.
-One project brief and total budget apply to everyone selected. Removing a
-creator preserves form values and updates the URL. Confirmation lists the
-submitted creators. Existing /request/[slug] links still support solo requests.
-Selection is stored in sessionStorage, while project form fields remain in
-memory. This is a simulated request; no messages or bookings are sent.

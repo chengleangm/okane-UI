@@ -36,7 +36,7 @@ export function GroupQuoteRequest({ initialCreators }: { initialCreators: Creato
       <div className="quote-review-footer">
         <Link className="quote-add-more" href="/creators"><Plus size={17} aria-hidden="true" />Add more creators</Link>
         <div className="quote-brief-note"><FileText size={18} aria-hidden="true" /><div><strong>One brief for everyone</strong><p>Your project details and total budget apply to all selected creators.</p></div></div>
-        <span className="quote-review-demo">Demo request ? nothing is sent</span>
+        <span className="quote-review-demo">Preview only — this shortlist is not submitted.</span>
       </div>
     </aside>
     <RequestFlow selectedCreators={selected} />

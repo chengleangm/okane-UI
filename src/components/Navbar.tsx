@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, X, ArrowUpRight, Users, LayoutDashboard, Search } from 'lucide-react';
+import { Menu, X, ArrowUpRight, Users, Search } from 'lucide-react';
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -18,7 +18,6 @@ export function Navbar() {
     <nav id="navigation" className={open ? 'nav-links open' : 'nav-links'}>
       <Link href="/creators" aria-current={path.startsWith('/creators') ? 'page' : undefined} onClick={() => setOpen(false)}><Users className="ui-icon" aria-hidden="true" /> Browse creators</Link>
       <Link href="/#how-it-works" onClick={() => setOpen(false)}>How it works <ArrowUpRight className="arrow-icon" aria-hidden="true" /></Link>
-      <Link href="/portal/login" aria-current={path.startsWith('/portal') ? 'page' : undefined} onClick={() => setOpen(false)}><LayoutDashboard className="ui-icon" aria-hidden="true" /> Demo portal</Link>
     </nav>
   </header>;
 }
