@@ -1,14 +1,11 @@
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Bot, MessageCircle, Users } from 'lucide-react';
-import { quoteDemoEnabled } from '@/lib/quote-demo';
 
 export const metadata = { title: 'Quote Workflow Demo' };
 
 export default function QuoteDemoControlPanel() {
-  if (!quoteDemoEnabled) notFound();
   return <main id="main" className="shell inner-page quote-demo-control">
-    <div className="quote-demo-banner"><Bot size={18} aria-hidden="true" /><span>DEVELOPMENT DEMO · SIMULATED TELEGRAM ONLY</span></div>
+    <div className="quote-demo-banner"><Bot size={18} aria-hidden="true" /><span>FICTIONAL DEMO · SIMULATED TELEGRAM ONLY</span></div>
     <h1>Demo Control Panel</h1>
     <p className="quote-demo-control-intro">Walk through the quotation workflow using fictional data stored only in this browser. No real Telegram messages are sent, and demo requests do not enter production systems.</p>
     <div className="quote-demo-flow-steps" aria-label="Demo workflow">
