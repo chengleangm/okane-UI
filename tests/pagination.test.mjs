@@ -32,3 +32,13 @@ test('out-of-range pages are clamped after filtering or deletion', () => {
   assert.equal(paginateItems([], 3).start, 0);
   assert.equal(paginateItems([], 3).end, 0);
 });
+
+test('public directory supports 30 per page without changing the admin default', () => {
+  const rows = Array.from({ length: 65 }, (_, i) => i);
+  assert.equal(paginateItems(rows, 1, 30).items.length, 30);
+  assert.deepEqual(paginateItems(rows, 3, 30).items, [60,61,62,63,64]);
+  assert.equal(paginateItems(rows, 3, 30).start, 61);
+  assert.equal(paginateItems(rows, 3, 30).end, 65);
+  assert.equal(paginateItems(rows, 1).items.length, 40);
+  assert.equal(paginateItems(rows, 1, 0).items.length, 40);
+});

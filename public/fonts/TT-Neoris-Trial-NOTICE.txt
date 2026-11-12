@@ -1,0 +1,10 @@
+﻿TT Neoris Trial Variable
+Foundry: TypeType
+Downloaded from TypeType Foundry's trial listing:
+https://www.dafont.com/tt-neoris.font
+Package: https://dl.dafont.com/dl/?f=tt_neoris
+
+The author lists this trial as PERSONAL USE ONLY. Published or commercial use
+requires an appropriate license from https://typetype.org/fonts/tt-neoris/.
+This file is included for the local design demo, not as a production font license.
+Replace it with a licensed webfont before publishing the site commercially.

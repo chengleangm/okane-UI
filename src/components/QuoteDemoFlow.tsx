@@ -16,6 +16,7 @@ import {
   type QuoteDemoRequest,
 } from '@/lib/quote-demo';
 import { QuoteDemoConversation } from './QuoteDemoConversation';
+import { CreatorRequestForm } from './CreatorRequestForm';
 
 const emptyInput: Omit<QuoteDemoInput, 'creatorSlugs' | 'creatorNames'> = {
   clientName: '',
@@ -32,17 +33,19 @@ function readRequests(): QuoteDemoRequest[] {
 }
 
 function todayLocal(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Phnom_Penh', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date());
 }
 
-export function QuoteDemoFlow({ creators }: { creators: Creator[] }) {
+export function QuoteDemoFlow({ creators, variant }: { creators: Creator[]; variant?: 'request' }) {
   const [connected, setConnected] = useState(false);
   const [sessionToken, setSessionToken] = useState('');
   const [requests, setRequests] = useState<QuoteDemoRequest[]>([]);
   const [currentRequest, setCurrentRequest] = useState<QuoteDemoRequest>();
   const [values, setValues] = useState<QuoteDemoInput>(() => ({
     ...emptyInput,
+    notes: variant === 'request' ? 'Budget currency: USD.' : '',
     creatorSlugs: creators.map(creator => creator.slug),
     creatorNames: creators.map(creator => creator.name),
   }));
@@ -119,12 +122,23 @@ export function QuoteDemoFlow({ creators }: { creators: Creator[] }) {
     const nextErrors = validateQuoteDemoInput(values, todayLocal(), demoConsent);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
-    if (!sessionToken) {
+    let token = sessionToken;
+    if (!token && variant === 'request') {
+      try { token = createQuoteDemoSessionToken(); }
+      catch { setStorageMessage('A demo session could not be created. Please try again in a modern browser.'); return; }
+    }
+    if (!token) {
       setStorageMessage('Connect the Telegram demo again to create a private demo session.');
       setConnected(false);
       return;
     }
-    if (requests.length >= 500) {
+    let savedRequests = requests;
+    try {
+      const raw = window.localStorage.getItem(QUOTE_DEMO_STORAGE_KEY);
+      if (!isQuoteDemoStorageValid(raw)) { setStorageMessage('Existing demo data is unreadable. Clear it in the admin simulator before submitting.'); return; }
+      savedRequests = parseQuoteDemoRequests(raw);
+    } catch { setStorageMessage('The request could not be saved. Allow local storage and try again.'); return; }
+    if (savedRequests.length >= 500) {
       setStorageMessage('This browser has reached the 500-request demo limit. Clear local demo data in the admin simulator to continue.');
       return;
     }
@@ -138,17 +152,19 @@ export function QuoteDemoFlow({ creators }: { creators: Creator[] }) {
         campaignDescription: values.campaignDescription.trim(),
         service: values.service.trim(),
         notes: values.notes.trim(),
-      }, sessionToken);
+      }, token);
     } catch {
       setStorageMessage('A secure demo session could not be created in this browser. Use a modern browser and try again.');
       return;
     }
-    const nextRequests = [request, ...requests.filter(item => item.id !== request.id)];
+    const nextRequests = [request, ...savedRequests.filter(item => item.id !== request.id)];
     try {
       window.localStorage.setItem(QUOTE_DEMO_STORAGE_KEY, JSON.stringify(nextRequests));
       setRequests(nextRequests);
       setCurrentRequest(request);
-      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#session=${sessionToken}`);
+      setConnected(true);
+      setSessionToken(token);
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#session=${token}`);
       setStorageMessage('');
     } catch {
       setStorageMessage('The demo request could not be saved in this browser. Check available local storage and try again.');
@@ -167,6 +183,8 @@ export function QuoteDemoFlow({ creators }: { creators: Creator[] }) {
       setStorageMessage('A secure demo connection could not be created in this browser. Try a modern browser with Web Crypto support.');
     }
   }
+
+  if (variant === 'request' && !currentRequest) return <CreatorRequestForm values={values} errors={errors} demoConsent={demoConsent} ready={ready} storageMessage={storageMessage} minDate={todayLocal()} onChange={setField} onConsent={value => { setDemoConsent(value); setErrors(current => ({ ...current, demoConsent: undefined })); }} onSubmit={submitRequest} />;
 
   if (!ready) return <section className="quote-demo-panel" aria-busy="true"><p>Loading demo request…</p></section>;
 
@@ -247,7 +265,7 @@ export function QuoteDemoFlow({ creators }: { creators: Creator[] }) {
           <div><dt>Campaign</dt><dd>{currentRequest.campaignDescription}</dd></div>
           <div><dt>Requested service</dt><dd>{currentRequest.service}</dd></div>
           <div><dt>Preferred date</dt><dd>{currentRequest.preferredDate}</dd></div>
-          {currentRequest.budget && <div><dt>Budget</dt><dd>{currentRequest.budget} <small>(currency unspecified)</small></dd></div>}
+          {currentRequest.budget && <div><dt>Budget</dt><dd>{currentRequest.budget} <small>{variant === 'request' ? 'USD' : '(currency unspecified)'}</small></dd></div>}
           {currentRequest.notes && <div><dt>Additional notes</dt><dd>{currentRequest.notes}</dd></div>}
         </dl>
       </div>

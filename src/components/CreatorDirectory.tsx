@@ -1,46 +1,35 @@
-"use client";
-import { useEffect, useRef, useState } from 'react';
-import { LayoutGrid, List, RotateCcw, ArrowRight } from 'lucide-react';
+﻿'use client';
+import { useRef, useState } from 'react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { creators } from '@/data/creators';
 import { CreatorCard } from './CreatorCard';
-import { Pagination } from './Pagination';
 import { paginateItems } from '@/lib/pagination';
 
-export function CreatorDirectory({ home = false, initialQuery = '' }: { home?: boolean; initialQuery?: string }) {
-  const [sort, setSort] = useState('featured');
+export function CreatorDirectory({ initialQuery = '' }: { initialQuery?: string }) {
+  const [sort, setSort] = useState('rating');
   const [page, setPage] = useState(1);
-  const resultsHeading = useRef<HTMLHeadingElement>(null);
-  const [category, setCategory] = useState('All');
   const [query, setQuery] = useState(initialQuery);
-  const [view, setView] = useState<'grid' | 'list'>('grid');
-  const categories = ['All', ...new Set(creators.map(c => c.category))];
-  const filtered = creators.filter(c => (category === 'All' || c.category === category) && [c.name, c.category, c.description].join(' ').toLowerCase().includes(query.trim().toLowerCase())).sort((a, b) => sort === 'name' ? a.name.localeCompare(b.name) : 0);
-  const pagination = paginateItems(filtered, page);
-  function reset() { setCategory('All'); setQuery(''); setPage(1); }
+  const heading = useRef<HTMLHeadingElement>(null);
+  const filtered = creators.filter(creator => [creator.name, creator.category, creator.description].join(' ').toLowerCase().includes(query.trim().toLowerCase())).sort((a,b) => sort === 'name' ? a.name.localeCompare(b.name) : (b.rating ?? -1) - (a.rating ?? -1));
+  const pagination = paginateItems(filtered, page, 30);
+  const pages = Array.from({length:pagination.totalPages},(_,index) => index+1).filter(number => number === 1 || number === pagination.totalPages || Math.abs(number-pagination.page) <= 1);
   function changePage(next: number) {
     setPage(next);
-    resultsHeading.current?.focus({ preventScroll: true });
-    resultsHeading.current?.scrollIntoView({ block: 'start' });
+    heading.current?.focus({preventScroll:true});
+    heading.current?.scrollIntoView({block:'start'});
   }
-
-  return <div className="market-directory">
-    <section className="directory-heading">
-      <span className="market-kicker">OKANE · CREATORS FOR SMALL BUSINESSES</span>
-      {home ? <h2>Find the right creator for your business.</h2> : <h1>Browse creators</h1>}
-      <p>Browse by category, check their work, and request a quote.</p>
-      {query && <p className="directory-search-summary">Search results for <strong>“{query}”</strong></p>}
-    </section>
-    <div className="market-layout">
-      <aside className="market-categories"><h2>Browse categories</h2><div className="market-category-options">{categories.map(c => <button key={c} aria-pressed={category === c} onClick={() => { setCategory(c); setPage(1); }}><span>{c === 'All' ? 'All creators' : c}</span><span className="category-count">{c === 'All' ? creators.length : creators.filter(person => person.category === c).length}</span></button>)}</div><div className="market-help"><h3>New to working with creators?</h3><p>Start with a profile. Check their sample work, then share what your business needs.</p><a href="#how-it-works">How it works <ArrowRight className="ui-icon" aria-hidden="true" focusable="false" /></a></div></aside>
-      <section className="market-results" aria-label="Creator listings">
-        <div className="market-results-bar"><div><h2 ref={resultsHeading} tabIndex={-1}>{category === 'All' ? 'All creators' : category}</h2><p role="status">{filtered.length} {filtered.length === 1 ? 'creator' : 'creators'} found</p></div><div className="market-view-tools"><label className="sort"><span>Sort</span><select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}><option value="featured">Featured</option><option value="name">Name A–Z</option></select></label><div className="view-switch" aria-label="Listing view"><button aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')}><List size={19} /></button><button aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><LayoutGrid size={18} /></button></div></div></div>
-        {(query || category !== 'All') && <button className="market-reset" onClick={reset}><RotateCcw size={14} aria-hidden="true" /> Clear filters</button>}
-        <div className={'market-listings ' + view} id="discover">{pagination.items.map(c => <CreatorCard key={c.slug} creator={c} />)}</div>
-        <Pagination {...pagination} onPageChange={changePage} />
-        {!filtered.length && <div className="portal-empty"><h2>No creators found</h2><p>Try a different keyword or browse all categories.</p><button className="button" onClick={reset}>Show all creators</button></div>}
-        <p className="market-demo-note">Creator photography and profile details are illustrative. Pricing is available on request.</p>
-      </section>
-    </div>
-    <section className="market-steps" id="how-it-works"><h2>From browsing to your next project</h2><div>{[['01', 'Find a creator', 'Search or choose a category that fits your business.'], ['02', 'Check their work', 'Open a profile to see their style and portfolio.'], ['03', 'Request a quote', 'Online quote requests are not available yet.']].map(([number, title, copy]) => <article key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></article>)}</div></section>
+  return <div className="v3-directory">
+    <header className="v3-directory-heading"><h1 ref={heading} tabIndex={-1}>Our Creators</h1><div className="v3-directory-tools">
+      <label className="v3-directory-search"><Search size={22} aria-hidden="true" /><span className="v3-sr-only">Search creators</span><input type="search" placeholder="Search creator" value={query} maxLength={120} onChange={event => {setQuery(event.target.value);setPage(1);}} /></label>
+      <label className="v3-directory-sort">Sort by<select value={sort} onChange={event => {setSort(event.target.value);setPage(1);}}><option value="rating">Rating</option><option value="name">Name</option></select></label>
+    </div></header>
+    <p className="v3-sr-only" role="status">{filtered.length} creators found. Showing {pagination.start} to {pagination.end}.</p>
+    <div className="v3-creator-grid">{pagination.items.map(creator => <CreatorCard key={creator.slug} creator={creator} />)}</div>
+    {!filtered.length && <div className="v3-directory-empty"><h2>No creators found</h2><p>Try another name or category.</p><button className="button" onClick={() => {setQuery('');setPage(1);}}>Show all creators</button></div>}
+    <div className="v3-directory-pagination"><p>30 creators per page</p><nav aria-label="Creator pages">
+      <button aria-label="Previous page" disabled={pagination.page === 1} onClick={() => changePage(pagination.page-1)}><ChevronLeft size={20} aria-hidden="true" /></button>
+      {pages.map((number,index) => <span className="v3-page-entry" key={number}>{index > 0 && number-pages[index-1] > 1 && <span className="v3-page-gap" aria-hidden="true">…</span>}<button aria-label={`Page ${number}`} aria-current={number === pagination.page ? 'page' : undefined} onClick={() => changePage(number)}>{number}</button></span>)}
+      <button aria-label="Next page" disabled={pagination.page === pagination.totalPages} onClick={() => changePage(pagination.page+1)}><ChevronRight size={20} aria-hidden="true" /></button>
+    </nav></div>
   </div>;
 }

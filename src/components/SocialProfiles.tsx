@@ -1,12 +1,13 @@
 ﻿'use client';
 import { useEffect, useState } from 'react';
 import { Facebook, Instagram, Youtube, Globe, Music2 } from 'lucide-react';
+import { LandingArtwork } from './LandingArtwork';
 import { STORAGE_KEY, parseCreators, socialPlatforms, normalizeSocialLinks, type SocialLinks, type SocialFollowers } from '@/lib/portal-data';
 
 const icons = { facebook: Facebook, instagram: Instagram, tiktok: Music2, youtube: Youtube, website: Globe };
 const formatFollowers = (count: number) => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(count);
 
-export function SocialProfiles({ links, followers, creatorId }: { links?: SocialLinks; followers?: SocialFollowers; creatorId?: string }) {
+export function SocialProfiles({ links, followers, creatorId, variant }: { links?: SocialLinks; followers?: SocialFollowers; creatorId?: string; variant?: 'detail' }) {
   const [saved, setSaved] = useState<{ links?: SocialLinks; followers?: SocialFollowers }>();
   useEffect(() => {
     if (!creatorId) return;
@@ -26,18 +27,22 @@ export function SocialProfiles({ links, followers, creatorId }: { links?: Social
   const counts = saved?.followers ?? followers ?? {};
   const hasLinks = Object.keys(normalized).length > 0;
   const platforms = socialPlatforms.filter(platform => normalized[platform.key] || counts[platform.key] !== undefined || (!hasLinks && ['facebook', 'tiktok', 'instagram'].includes(platform.key)));
-  return <section className="social-profiles" aria-label="Creator social profiles"><h2>Social audience</h2>
-    <div className="social-audience-grid">{platforms.map(platform => {
+  const detail = variant === 'detail';
+  const orderedPlatforms = detail ? [...platforms].sort((a,b) => ['facebook','instagram','tiktok','youtube','website'].indexOf(a.key) - ['facebook','instagram','tiktok','youtube','website'].indexOf(b.key)) : platforms;
+  return <section className={detail ? 'social-profiles v3-detail-social' : 'social-profiles'} aria-label="Creator social profiles"><h2>Social audience</h2>
+    <div className="social-audience-grid">{orderedPlatforms.map(platform => {
       const Icon = icons[platform.key];
       const count = counts[platform.key];
       const href = normalized[platform.key];
+      const sourceX = { facebook:121, instagram:294, tiktok:466 }[platform.key as 'facebook' | 'instagram' | 'tiktok'];
+      const icon = detail && sourceX !== undefined ? <LandingArtwork source="/images/creator-detail-reference.png" canvas={[1512,982]} crop={[sourceX,243,41,40]} className="v3-social-icon" /> : <Icon size={20} aria-hidden="true" focusable="false" />;
       return <div className="social-audience-item" key={platform.key}>
-        {href ? <a className={'social-circle social-demo-' + platform.key} href={href} target="_blank" rel="noopener noreferrer" title={platform.label} aria-label={platform.label + ' (opens in a new tab)'}><Icon size={20} aria-hidden="true" focusable="false" /></a> : <span className={'social-demo-icon social-demo-' + platform.key} role="img" aria-label={platform.label + ' icon'} title={platform.label + ' profile link not provided'}><Icon size={20} aria-hidden="true" focusable="false" /></span>}
+        {href ? <a className={'social-circle social-demo-' + platform.key} href={href} target="_blank" rel="noopener noreferrer" title={platform.label} aria-label={platform.label + ' (opens in a new tab)'}>{icon}</a> : <span className={'social-demo-icon social-demo-' + platform.key} role="img" aria-label={platform.label + ' icon'} title={platform.label + ' profile link not provided'}>{icon}</span>}
         <span className="social-platform-name">{platform.label === 'Website / other link' ? 'Website' : platform.label}</span>
         {platform.key !== 'website' && <><strong className="social-follower-count" title={count !== undefined ? count.toLocaleString('en') + ' followers' : 'Follower count not provided'}>{count !== undefined ? formatFollowers(count) : '—'}</strong><span className="social-follower-label">followers</span></>}
       </div>;
     })}</div>
-    <p className="social-empty">Audience counts are manually entered and not verified.</p>
-    {!hasLinks && <p className="social-empty">Social profile links have not been provided.</p>}
+    {!detail && <p className="social-empty">Audience counts are manually entered and not verified.</p>}
+    {!detail && !hasLinks && <p className="social-empty">Social profile links have not been provided.</p>}
   </section>;
 }
